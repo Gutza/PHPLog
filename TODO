@@ -1,0 +1,13 @@
+  TODO List
+  Bogdan Stancescu <bogdan@moongate.ro>, December 2002
+  $Id: TODO,v 1.4 2002/12/19 23:42:34 bogdan Exp $
+
+  Just an internal to do list of things I might forget. This isn't
+  an official to do list - lots of features obviously needed aren't
+  listed here.
+
+  - In PHPLog, check if config file is newer than stored entry
+  - Locks!
+  - sh wrappers; wrapper for PLParser.php in order to allow starting
+    as a daemon;
+  - RPM

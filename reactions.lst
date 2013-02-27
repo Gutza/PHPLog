@@ -1,0 +1,21 @@
+# PHPLog custom reaction verbs list
+# $Id: reactions.lst,v 1.1 2002/12/19 18:59:20 bogdan Exp $
+
+# Lines starting with "#" are ignored; empty lines
+# are ignored; spaces at the beginning and end of lines
+# are ignored; everything is case sensitive.
+
+# List reaction verbs here, one per line, no other
+# informaion needed.
+
+# For instance, if you wanted to create a plugin to send
+# data via ssh with the following format:
+# sshSend host="<host>" format="<format>"
+# then the line you'd want to add here would look like
+# sshSend
+
+# Of course, you'd also have to write the code to actually
+# react to that. You would probably want to do that in
+# include/classes/PL_Plugin.php so the next version of
+# PHPLog won't overwrite your changes (which would happen
+# if you were to implement your code in PL_Executor.php)

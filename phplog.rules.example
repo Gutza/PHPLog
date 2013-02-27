@@ -1,0 +1,150 @@
+# PHPLog rules file
+# Bogdan Stancescu <bogdan@moongate.ro>, November 2002
+# $Id: phplog.rules.example,v 1.8 2003/01/19 12:26:10 bogdan Exp $
+
+# Empty lines and lines starting with # are ignored.
+# Spaces/TABs at the beginning and end of lines are ignored.
+# Everything is case sensitive.
+
+# ---------------------------------------------------------
+#                        Globals
+# ---------------------------------------------------------
+
+# If on, duplicate entries from various log files are ignored.
+# The order of parsing files is the one in the configuration.
+# Default is on.
+config ignore_duplicates=on
+
+# Time to wait between two file checks, in seconds.
+# Default is 2.
+config sleep=2
+
+# The date format for <%formatted_date%> formatted strings :)
+# The format must be a string, not enclosed in quotes, usable
+# for PHP's date (see http://www.php.net/manual/en/function.date.php)
+# By default, it's "r" (no quotes)
+config date_format=r
+
+# The default e-mail address to send mail to
+config mail=root@localhost
+
+# You may set up some groups to use in the files section, in order to
+# allow specific users to access results of specific rules (actions).
+# The format is
+# group <group name>=<user id>.<group id>|<permissions>|<path>
+# <user id> and <group id> may be specified by name or number and the
+# permissions should be expressed in octal, with no prepending "0"
+# (e.g. 666 would be full permissions)
+# <group name> MUST ONLY contain alphanumeric characters (i.e. [a-zA-Z0-9])
+# and MUST NOT start with a number
+# (they're checked against /^[a-zA-Z][a-zA-Z0-9]*$/ for validity)
+group everybody=root.root|666|/tmp
+
+# Here we define a custom group which will be used below
+# as the default group for all actions which don't have a group
+# associated.
+group custom=root.root|600|/tmp
+
+config group=custom
+
+# ---------------------------------------------------------
+#                          Files
+# ---------------------------------------------------------
+#
+# Structure at a glance
+# ---------------------
+# Any number of FILEs may have any number of ACTIONs which
+# contain an arbitrary number of REACTIONs.
+#
+# Quick Reference
+# ---------------
+#
+# *FILE*
+# - from <filename>
+#
+# *ACTION*
+# - watchfor <regexp>
+# - ignore <regexp>
+# - default [<group>]
+#
+# *REACTION*
+# - echo [style[;style[...]]]
+# - mail [subject="<format>"] [email="<e-mail address>"] [content="<format>"]
+# - log [file="<logfile>"] [log="<format>"]
+# - beep
+# - exec command="<format>"
+#
+# *REGEXP*
+# /regexp/ [p][i][|<group>]
+# Mind the space after the regexp!
+#
+# *FORMAT*
+# The format is an ASP-like string, in which elements of the form
+# <%element%> are replaced with their respective values.
+# Here's the list of available elements (case sensitive):
+# - <%logfile%> - the log file, with full absolute path
+# - <%line%> - the log file line (the log entry, not the line number)
+# - <%date%> - the date/time at which the line was trapped by PHPlog
+#              The date is formatted according to RFC 822
+#              e.g. "Thu, 21 Dec 2000 16:01:07 +0200"
+# - <%formatted_date%> - the date, formatted according to the global
+#              configuration setting date_format.
+# - <%eol%> - new line (EOL character - equivalent to a \n)
+#
+# Details
+# -------
+# FILEs start with a line reading "from <filename>".
+# <filename> must contain the absolute path to the file
+# (e.g. /var/log/mail/info)
+# Files end only when another file starts.
+# There are three possible tags under files (called "actions"):
+# - watchfor <regexp>
+# - ignore <regexp>
+# - default
+# The default executes when no other actions in a file matches
+# a line. Each action ends when another one or another file starts.
+# Under each action (except for ignore actions) there may be any
+# number of reactions
+
+# REGEXP parameters:
+# - p: performs a preg_match().
+#      If not specified, performs an ereg()/eregi().
+# - i: performs a case-insensitive preg_match() or eregi().
+#      If not specified, performs a case-sensitive preg_match() or ereg()
+# - |<group>: if specified, the resulting temporary file will be set to
+#      the respective group, as defined in the globals.
+
+# In REACTIONS, the double quotes in which parameters are enclosed
+# are MANDATORY, even if it's a single word you're passing.
+# Currently there is no way to escape double quotes within parameters,
+# but backslash escaping is planned. In other words, for the time being
+# you cannot include double quotes in the double quotes.
+
+# A file without filename is the global default. The local default has
+# precedence, but be warned that if a global default is present, ALL lines
+# in ALL files which are not explicitly ignored will end up in the temp
+# directory!
+from
+  default
+    echo blue
+
+from /var/log/httpd/access_log
+  watchfor /127\.0\.0\.1/
+    echo black;on_white
+    mail email="webmaster@localhost"
+
+  default everybody
+    echo green
+
+from /var/log/mail/info
+  watchfor /sendmail/ |everybody
+    echo on_blue;white
+
+  ignore /asdsa/
+
+  default
+    echo
+
+from /var/log/syslog
+  watchfor /asds/
+    beep
